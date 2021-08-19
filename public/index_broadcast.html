@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"/>
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script>
+            try {
+                const ws = new WebSocket('ws://localhost:4500');
+
+                console.log('[index_ws.html] created new Websocket...')
+
+                // Connection opened
+                ws.addEventListener('open', function (event) {
+                    console.log('[index_ws.html.addEventListener().open] socket connected...');
+                });
+
+                // Listen for messages
+                ws.addEventListener('message', function (event) {
+                    console.log('[index_ws.html.addEventListener().message] Message from server ', event.data);
+                    
+/*                     let alert = document.getElementById('alert');
+                    alert.innerHTML = '<div class="alert alert-info alert-dismissible fade show" role="alert">' +
+                                            event.data +
+                                                '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                                                    '<span aria-hidden="true">&times;</span>' +
+                                                '</button>' +
+                                        '</div>'; */
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        </script>
+
+    </head>
+    <body class="container">
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+        <div>
+            <h3>[server.ws.ts] is working !</h3>
+            <button type="button" id="btnData" class="btn btn-primary" style="margin-top: 25px;">Add data</button>
+        </div>
+
+        <div class="container" id="output" style="margin-top: 50px;"></div>
+        <div class="container" id="alert"></div>
+
+        <script>
+            let output = document.getElementById('output');
+
+            document.getElementById('btnData').onclick = function () {
+
+                axios.get('http://localhost:4500/users')
+                    .then(function (res) {
+                        output.className = 'container'
+                        output.innerHTML = res.data;
+                    })
+                    .catch(function (err) {
+                        output.className = 'container text-danger'
+                        output.innerHTML = err;
+                    })
+            }
+            
+
+        </script>
+    </body>
+</html>
