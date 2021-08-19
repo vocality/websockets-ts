@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 let userId = uuidv4();
 
-const ws = new WebSocket('ws://localhost:8081');
+const ws = new WebSocket('ws://localhost:4500');
 
 ws.on('open', () => {
     console.log('Connected to ws server...')
