@@ -1,0 +1,10 @@
+@startuml seq
+autonumber
+User -> Server: request
+note left: 1st note
+Server -> User: response
+note right: 2nd note
+User -> Server: another request
+Server -> User: another response
+@enduml
+
