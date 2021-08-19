@@ -4,9 +4,21 @@ import { createServer } from 'http'
 
 let wss: Server
 
-const broadcast = (data: any, ws: any) => {
+const broadcastExclude = (ws: any, data: any) => {
     wss.clients.forEach(client => {
         if (client !== ws && client.readyState === WebSocket.OPEN) {
+            try {
+                client.send(data)
+            } catch(err) {
+                console.log(`[broadcast()] ${err}`)
+            }
+        }
+    })
+}
+
+const broadcast = (data: any) => {
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
             try {
                 client.send(data)
             } catch(err) {
@@ -21,7 +33,7 @@ const getHandler = (req: Request, res: Response) => {
     //curWs.send('notif from getHandler...')
 
     // broadcast
-    //broadcast('User created !')
+    broadcast('User created !')
 
     res.status(200).send('Users list coming soon...')
 }
@@ -66,13 +78,13 @@ const bootstrap = () => {
             (ws as any).id = data; // typeof Buffer
     
             //ws.send(`Processing: '${data}'`);
-            broadcast(`Join: ${data}`, ws)
+            broadcastExclude(ws, `Join: ${data}`)
         });
     
         ws.on('close', (code: number, reason: string) => {
             const leftUserId: Buffer = (ws as any).id
             console.log(`Left: ${leftUserId}`)
-            broadcast(`Left: ${leftUserId}`, ws)
+            broadcastExclude(ws, `Left: ${leftUserId}`)
         })
     });
 
