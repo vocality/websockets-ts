@@ -7,7 +7,6 @@ const ws = new WebSocket('ws://localhost:4500');
 
 ws.on('open', () => {
     console.log('Connected to ws server...')
-    //ws.send(`New user created ${userId}`);
     ws.send(userId)
 });
 

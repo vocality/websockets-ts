@@ -29,11 +29,8 @@ const broadcast = (data: any) => {
 }
 
 const getHandler = (req: Request, res: Response) => {
-    // send WS notification
-    //curWs.send('notif from getHandler...')
-
-    // broadcast
-    broadcast('User created !')
+    const msg = JSON.stringify({ type: 'action', message: `[getHandler()] called...` });
+    broadcast(msg);
 
     res.status(200).send('Users list coming soon...')
 }
@@ -46,9 +43,9 @@ const bootstrap = () => {
     // Serve static files from the 'public' folder.
     //
     app.use(express.static('public'));
-    app.get('*', (req: Request, res: Response) => {
+/*     app.get('*', (req: Request, res: Response) => {
         res.sendFile('index_broadcast.html', {root: 'public'});
-    });
+    }); */
 
     //
     // routes
@@ -76,15 +73,17 @@ const bootstrap = () => {
             console.log(`Join: '${data}'`);
     
             (ws as any).id = data; // typeof Buffer
-    
-            //ws.send(`Processing: '${data}'`);
-            broadcastExclude(ws, `Join: ${data}`)
+            //broadcast(`Join: ${data}`)
+            const msg = JSON.stringify({ type: 'chat', message: `Join: ${data}` })
+            broadcast(msg)
         });
     
         ws.on('close', (code: number, reason: string) => {
             const leftUserId: Buffer = (ws as any).id
             console.log(`Left: ${leftUserId}`)
-            broadcastExclude(ws, `Left: ${leftUserId}`)
+            //broadcastExclude(ws, `Left: ${leftUserId}`)
+            const msg = JSON.stringify({ type: 'chat', message: `Left: ${leftUserId}` })
+            broadcastExclude(ws, msg)
         })
     });
 
@@ -92,7 +91,7 @@ const bootstrap = () => {
     // start server
     //
     server.listen(4500, () => {
-        console.log(`HTTP server listen at port 4500...`)
+        console.log(`[bootstrap] HTTP server listen at port 4500...`)
     })
 }
 

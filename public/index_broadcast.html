@@ -15,52 +15,73 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-        <script>
-            try {
-                const ws = new WebSocket('ws://localhost:4500');
-
-                console.log('[index_ws.html] created new Websocket...')
-
-                // Connection opened
-                ws.addEventListener('open', function (event) {
-                    console.log('[index_ws.html.addEventListener().open] socket connected...');
-                });
-
-                // Listen for messages
-                ws.addEventListener('message', function (event) {
-                    console.log('[index_ws.html.addEventListener().message] Message from server ', event.data);
-                    
-/*                     let alert = document.getElementById('alert');
-                    alert.innerHTML = '<div class="alert alert-info alert-dismissible fade show" role="alert">' +
-                                            event.data +
-                                                '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
-                                                    '<span aria-hidden="true">&times;</span>' +
-                                                '</button>' +
-                                        '</div>'; */
-                });
-            } catch (error) {
-                console.log(error);
-            }
-        </script>
-
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
     </head>
     <body class="container">
         <!--[if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
-        <div>
-            <h3>[server.ws.ts] is working !</h3>
-            <button type="button" id="btnData" class="btn btn-primary" style="margin-top: 25px;">Add data</button>
+        <div class="container" id="status"></div>
+        <div class="container" id="user_id"></div>
+        <div class="container">
+            <button type="button" id="btnData" class="btn btn-primary" style="margin-top: 25px;">Get data</button>
+            <button type="button" id="btnDisconnect" class="btn btn-primary" style="margin-top: 25px;">Disconnect</button>
         </div>
 
         <div class="container" id="output" style="margin-top: 50px;"></div>
         <div class="container" id="alert"></div>
 
         <script>
+            let ws;
+
+            try {
+                ws = new WebSocket('ws://localhost:4500');
+                let userId = uuidv4();
+
+                // Connection opened
+                ws.addEventListener('open', function (event) {
+                    ws.send(userId);
+
+                    document.getElementById('status').innerText = 'Status: Connected';
+                    document.getElementById('user_id').innerText = 'Current ID: ' + userId;
+                });
+
+                // Listen for messages
+                ws.addEventListener('message', function (event) {
+                    console.log('[message] Message from server ', event.data);
+
+                    // filter received data by 'type': chat, action
+                    const data = JSON.parse(event.data)
+                    
+                    let alert = document.getElementById('alert');
+
+                    switch(data.type) {
+                        case 'action':
+                            alert.innerHTML = '<div class="alert alert-info alert-dismissible fade show" role="alert">' +
+                                                data.message +
+                                                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                                                        '<span aria-hidden="true">&times;</span>' +
+                                                    '</button>' +
+                                            '</div>'; 
+                            break;
+
+                        case 'chat':
+                            alert.innerHTML = '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                                                data.message +
+                                                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                                                        '<span aria-hidden="true">&times;</span>' +
+                                                    '</button>' +
+                                            '</div>'; 
+                            break;
+                    }                    
+                });
+            } catch (error) {
+                console.log(error);
+            }
+
             let output = document.getElementById('output');
 
             document.getElementById('btnData').onclick = function () {
-
                 axios.get('http://localhost:4500/users')
                     .then(function (res) {
                         output.className = 'container'
@@ -70,9 +91,16 @@
                         output.className = 'container text-danger'
                         output.innerHTML = err;
                     })
-            }
-            
+            };
 
+            document.getElementById('btnDisconnect').onclick = function () {
+                ws.close();
+                document.getElementById('status').innerText = 'Status: Disconnected';
+                document.getElementById('user_id').innerText = '';
+                document.getElementById('btnData').disabled = true;
+                document.getElementById('btnDisconnect').disabled = true;
+                output.innerText =  '';
+            };
         </script>
     </body>
 </html>
