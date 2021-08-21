@@ -49,7 +49,7 @@ const bootstrap = () => {
   app.use(express.static('public'));
   /*
   app.get('*', (req: Request, res: Response) => {
-      res.sendFile('index_broadcast.html', {root: 'public'});
+      res.sendFile('index_ws-redis.html', {root: 'public'});
   });
   */
 
